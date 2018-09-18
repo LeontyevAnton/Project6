@@ -206,7 +206,7 @@ class Boss {
         });
 
         if (dismis && department) {
-            this.departments[department].developers.splice(1);
+            this.departments[department].developers.splice(0);
             this.lazyDevelopers += 1;
         }
     }
