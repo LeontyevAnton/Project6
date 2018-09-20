@@ -195,19 +195,19 @@ class Boss {
     }
 
     dismissal() {
-        let dismis;
+        let goAway;
         let department;
 
         Object.keys(this.departments).forEach(key => {
-            this.departments[key].developers.forEach(develop => {
-                if (develop.freeDays > 3 && (!dismis || dismis.doneProjects > develop.doneProjects)) {
-                    dismis = develop;
-                    department = develop.type;
+            this.departments[key].developers.forEach(developer => {
+                if (developer.freeDays > 3 && (!goAway || goAway.doneProjects > developer.doneProjects)) {
+                    goAway = developer;
+                    department = developer.type;
                 }
             });
         });
 
-        if (dismis && department) {
+        if (goAway && department) {
             this.departments[department].developers.splice(0);
             this.lazyDevelopers += 1;
         }
