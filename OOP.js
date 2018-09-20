@@ -1,5 +1,5 @@
 const days = 10000;
-let dir = null;
+let tmp = null;
 let tasksN = 0;
 let count = 0;
 
@@ -34,10 +34,9 @@ function live() {
 
 class Project {
     constructor(type, complexity) {
-        this.id = count;
+        this.id = count+=1;
         this.type = type ? "web" : "mobile";
         this.complexity = complexity;
-        count += 1;
     }
 }
 
@@ -140,7 +139,7 @@ class Department {
 
 class Boss {
     constructor(name,firm) {
-        if (!dir) {
+        if (!tmp) {
             this.firm=firm;
             this.name = name;
             this.newDevelopers = 0;
@@ -152,9 +151,9 @@ class Boss {
             };
             this.pastTasks = [];
             this.testProjects = [];
-            dir = this;
+            tmp = this;
         }
-        return dir;
+        return tmp;
     }
 
     takeTasks(tasks) {
