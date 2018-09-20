@@ -1,4 +1,4 @@
-const days = 10000;
+const days = prompt("Сколько дней вашей фирме?");
 let tmp = null;
 let tasksN = 0;
 let count = 0;
