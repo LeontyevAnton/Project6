@@ -16,14 +16,15 @@ function createTasks() {
 }
 
 function live() {
-    const director = new Boss("Lodoss Team");
+    const director = new Boss("Никита Ващенко","Lodoss Team");
     for (let i = 0; i < days; i += 1) {
         const tasks = createTasks();
         tasksN += tasks.length;
         director.takeTasks(tasks);
         director.dayAdding();
     }
-    console.log("Название фирмы:", director.name)
+    console.log("Название фирмы:", director.firm);
+    console.log("Директор:", director.name)
     console.log("Общее количество проектов", tasksN);
     console.log("Уволенные: ", director.lazyDevelopers);
     console.log("Нанятые: ", director.newDevelopers);
@@ -138,8 +139,9 @@ class Department {
 }
 
 class Boss {
-    constructor(name) {
+    constructor(name,firm) {
         if (!dir) {
+            this.firm=firm;
             this.name = name;
             this.newDevelopers = 0;
             this.lazyDevelopers = 0;
@@ -170,7 +172,7 @@ class Boss {
             }
         });
 
-        this.testProjects = [];
+        this.testProjects.length=0;
 
         Object.keys(this.departments).forEach(key => {
             this.departments[key].dayAdding();
@@ -181,12 +183,12 @@ class Boss {
             this.newDevelopers += 1;
         });
 
-        this.pastTasks = [];
+        this.pastTasks.length=0;
 
         Object.keys(this.departments).forEach(key => {
             if (this.departments[key].type !== "QA") {
                 this.departments[key].testProjects.forEach(proj => this.testProjects.push(proj));
-                this.departments[key].testProjects = [];
+                this.departments[key].testProjects.length=0;
             }
         });
         this.dismissal();
