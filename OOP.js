@@ -2,15 +2,17 @@ const days = 1000;//prompt("Сколько дней вашей фирме?");
 let totalNumberOfProjects = 0;
 let id = 0;
 const daysWithoutWorkLimit=3;
-const type=[0,1];
 const complexity=[1,2,3];
 const recievedProjects=[0,1,2,3,4];
 
 class Project {
-    constructor(type, complexity) {
-        this.id=id+=1;
-        this.type = type ? "web" : "mobile";
+    get id() {
+        return this._id;
+    }
+    constructor(complexity,dep) {
+        this._id=id+=1;
         this.complexity = complexity;
+        this.type=dep.type;
     }
 }
 
@@ -58,7 +60,7 @@ class Dep {
     chooseFreeDev(value) {
         if (!value)
             return this.devs.find(dev => !dev.project);
-        return this.devs.filter(dev => dev.project ? false:true);
+        return this.devs.filter(dev => !dev.project);
     }
 
 
@@ -132,7 +134,7 @@ class Firm {
 
     takeProjects(projects) {
         projects.forEach(project => {
-            if (!this.departments[project.type].projectDistribution(project))
+            if (!(web||mobile).projectDistribution(project))
                 this.previousProjects.push(project);
         });
     }
@@ -153,7 +155,7 @@ class Firm {
         });
 
         this.previousProjects.forEach(project => {
-            this.departments[project.type].newDev(new Dev(project.type, project));
+            (web||mobile).newDev(new Dev((web||mobile), project));
             this.hiredDevs += 1;
         });
 
@@ -183,21 +185,27 @@ class Firm {
         });
 
         if (goAway && department) {
-            this.departments[department].devs.splice(0);
+            QA.devs.splice(0);
+            web.devs.splice(0);
+            mobile.devs.splice(0);
             this.dissmissedDevs += 1;
         }
     }
 
 
-    random(min, max) {
+    static random(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
 
-    createProjects() {
+    static createProjects() {
         const projects = [];
-        for (let i = 0; i < this.random(recievedProjects[0], recievedProjects[4]); i += 1) {
-            projects.push(new Project(this.random(type[0], type[1]), this.random(complexity[0], complexity[2])));
+        for (let i = 0; i < Firm.random(recievedProjects[0], recievedProjects[4]); i += 1) {
+            let x=Firm.random(0,1);
+            if(x===0)
+                projects.push(new Project(Firm.random(complexity[0], complexity[2]),web));
+            else
+                projects.push(new Project(Firm.random(complexity[0], complexity[2]),mobile));
         }
         return projects;
     }
@@ -205,9 +213,9 @@ class Firm {
 
     Stat(){
         console.log("Общее количество проектов", totalNumberOfProjects);
-        console.log("Уволенные: ", this.dissmissedDevs);
+        console.log("Количество готовых проектов: ", QA.workDoneProjects);
         console.log("Нанятые: ", this.hiredDevs);
-        console.log("Количество готовых проектов: ", QA.workDoneProjects.length);
+        console.log("Уволенные: ", this.dissmissedDevs);
     }
 }
 
@@ -215,7 +223,7 @@ class Firm {
 function live() {
     const Lodoss = new Firm();
     for (let i = 0; i < days; i += 1) {
-        projects = Lodoss.createProjects();
+        const projects = Firm.createProjects();
         totalNumberOfProjects += projects.length;
         Lodoss.takeProjects(projects);
         Lodoss.dayAdding();
