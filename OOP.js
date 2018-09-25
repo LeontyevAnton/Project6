@@ -1,4 +1,5 @@
 const days = 1000;//prompt("Сколько дней вашей фирме?");
+let singletonInstance = null;
 let totalNumberOfProjects = 0;
 let id = 0;
 const daysWithoutWorkLimit=3;
@@ -124,11 +125,15 @@ class Firm {
 
 
     constructor() {
-        this.hiredDevs = 0;
-        this.dissmissedDevs = 0;
-        this.departments={web,mobile,QA};
-        this.previousProjects = [];
-        this.testedProjects = [];
+		if (!singletonInstance) {
+        	this.hiredDevs = 0;
+        	this.dissmissedDevs = 0;
+        	this.departments={web,mobile,QA};
+        	this.previousProjects = [];
+        	this.testedProjects = [];
+			singletonInstance = this;
+        }
+	return singletonInstance;
     }
 
 
@@ -213,7 +218,7 @@ class Firm {
 
     Stat(){
         console.log("Общее количество проектов", totalNumberOfProjects);
-        console.log("Количество готовых проектов: ", QA.workDoneProjects);
+        console.log("Количество готовых проектов: ", QA.workDoneProjects.length);
         console.log("Нанятые: ", this.hiredDevs);
         console.log("Уволенные: ", this.dissmissedDevs);
     }
@@ -222,6 +227,8 @@ class Firm {
 
 function live() {
     const Lodoss = new Firm();
+	const Dunice = new Firm();
+	console.log((Lodoss==Dunice)?true:false);
     for (let i = 0; i < days; i += 1) {
         const projects = Firm.createProjects();
         totalNumberOfProjects += projects.length;
