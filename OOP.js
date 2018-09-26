@@ -235,41 +235,38 @@ class Firm {
         console.log("Количество готовых проектов: ", QA.workDoneProjects.length);
         console.log("Нанятые: ", this.hiredDevs);
         console.log("Уволенные: ", this.dissmissedDevs);
-		/*console.log(web);
-		console.log(mobile);
-		console.log(QA);*/
     }
 }
 
 class live {
 	constructor(Comp) {
 		if (!singleton1) {
-		this.Comp=new Firm;
-singleton1=this;
-	}
+			this.Comp=new Firm;
+			singleton1=this;
+		}
 	return singleton1;
     }
 
 	live(days,param) {
-	if(param==="detail"){
-   	for(let i=0;i<days;i++) {
-		console.log("День:",i);
-        const projects = Firm.createProjects();
-        totalNumberOfProjects += projects.length;
-        this.Comp.takeProjects(projects);
-		this.Comp.Stat();
-        this.Comp.dayAdding();
-    }
-    }else{
-	for(let i=0;i<days;i++) {
-        const projects = Firm.createProjects();
-        totalNumberOfProjects += projects.length;
-        this.Comp.takeProjects(projects);
-        this.Comp.dayAdding();
-    }
-this.Comp.Stat();
-    }
-}
+		if(param==="detail"){
+   			for(let i=0;i<days;i++) {
+				console.log("День:",i);
+        		const projects = Firm.createProjects();
+        		totalNumberOfProjects += projects.length;
+        		this.Comp.takeProjects(projects);
+				this.Comp.Stat();
+        		this.Comp.dayAdding();
+    		}
+    	}else{
+			for(let i=0;i<days;i++) {
+        		const projects = Firm.createProjects();
+        		totalNumberOfProjects += projects.length;
+        		this.Comp.takeProjects(projects);
+        		this.Comp.dayAdding();
+    		}
+			this.Comp.Stat();
+   		}
+	}
 }
 
 let Live=new live("Lodoss");
