@@ -1,4 +1,4 @@
-const days = 1000;//prompt("Сколько дней вашей фирме?");
+const days = 10;//prompt("Сколько дней вашей фирме?");
 let totalNumberOfProjects = 0;
 let singletonInstance = null;
 let id = 0;
@@ -18,11 +18,11 @@ class Project {
 }
 
 class Dev {
-    constructor(specialization, project) {
+    constructor(dep, project) {
         this.doneProjects = 0;
         this.daysWithoutWork = 0;
         this.project = null;
-        this.specialization = specialization;
+        this.specialization = dep.type;
         this.workProject(project);
     }
 
@@ -59,7 +59,7 @@ class Dep {
 
 
 	static get Builder() { 
-		class Builder { 
+	    class Builder { 
 			constructor(type) { 
 				this.type = type;
 			} 
@@ -230,10 +230,13 @@ class Firm {
 
 
     Stat(){
-        console.log("Общее количество проектов", totalNumberOfProjects);
+        console.log("Общее количество проектов:", totalNumberOfProjects);
         console.log("Количество готовых проектов: ", QA.workDoneProjects.length);
         console.log("Нанятые: ", this.hiredDevs);
         console.log("Уволенные: ", this.dissmissedDevs);
+		/*console.log(web);
+		console.log(mobile);
+		console.log(QA);*/
     }
 }
 
@@ -243,13 +246,12 @@ function live() {
 	const NoName = new Firm();
 	console.log(Lodoss===NoName);
     for (let i = 0; i < days; i += 1) {
+		console.log("День:",i);
         const projects = Firm.createProjects();
         totalNumberOfProjects += projects.length;
         Lodoss.takeProjects(projects);
+		Lodoss.Stat();
         Lodoss.dayAdding();
     }
-    Lodoss.Stat();
 }
-
-console.log(web,mobile,QA);
 live();
