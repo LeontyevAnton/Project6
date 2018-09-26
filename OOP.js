@@ -1,5 +1,7 @@
+
 let totalNumberOfProjects = 0;
-let singletonInstance = null;
+let singleton = null;
+let singleton1 = null;
 let id = 0;
 const daysWithoutWorkLimit=3;
 const complexity=[1,2,3];
@@ -137,15 +139,15 @@ class Firm {
 
 
      constructor() {
-		if (!singletonInstance) {
+		if (!singleton) {
         	this.hiredDevs = 0;
         	this.dissmissedDevs = 0;
         	this.departments={web,mobile,QA};
         	this.previousProjects = [];
         	this.testedProjects = [];
-			singletonInstance = this;
+			singleton = this;
         }
-	return singletonInstance;
+	return singleton;
     }
 
 
@@ -240,20 +242,37 @@ class Firm {
 }
 
 class live {
-	live(days) {
-    const Lodoss = new Firm();
-	const NoName = new Firm();
-	console.log(Lodoss===NoName);
+	constructor(Comp) {
+		if (!singleton1) {
+		this.Comp=new Firm;
+singleton1=this;
+	}
+	return singleton1;
+    }
+
+	live(days,param) {
+	if(param==="detail"){
    	for(let i=0;i<days;i++) {
 		console.log("День:",i);
         const projects = Firm.createProjects();
         totalNumberOfProjects += projects.length;
-        Lodoss.takeProjects(projects);
-		Lodoss.Stat();
-        Lodoss.dayAdding();
+        this.Comp.takeProjects(projects);
+		this.Comp.Stat();
+        this.Comp.dayAdding();
+    }
+    }else{
+	for(let i=0;i<days;i++) {
+        const projects = Firm.createProjects();
+        totalNumberOfProjects += projects.length;
+        this.Comp.takeProjects(projects);
+        this.Comp.dayAdding();
+    }
+this.Comp.Stat();
     }
 }
 }
 
-let Live=new live(100);
-Live.live(100);
+let Live=new live("Lodoss");
+let Live1=new live("NoName");
+console.log(Live===Live1);
+Live.live(5,"detail");
