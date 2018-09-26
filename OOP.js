@@ -1,4 +1,3 @@
-const days = 10;//prompt("Сколько дней вашей фирме?");
 let totalNumberOfProjects = 0;
 let singletonInstance = null;
 let id = 0;
@@ -240,12 +239,12 @@ class Firm {
     }
 }
 
-
-function live() {
+class live {
+	live(days) {
     const Lodoss = new Firm();
 	const NoName = new Firm();
 	console.log(Lodoss===NoName);
-    for (let i = 0; i < days; i += 1) {
+   	for(let i=0;i<days;i++) {
 		console.log("День:",i);
         const projects = Firm.createProjects();
         totalNumberOfProjects += projects.length;
@@ -254,4 +253,7 @@ function live() {
         Lodoss.dayAdding();
     }
 }
-live();
+}
+
+let Live=new live(100);
+Live.live(100);
