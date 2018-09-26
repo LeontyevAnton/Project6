@@ -1,6 +1,6 @@
 const days = 1000;//prompt("Сколько дней вашей фирме?");
-let singletonInstance = null;
 let totalNumberOfProjects = 0;
+let singletonInstance = null;
 let id = 0;
 const daysWithoutWorkLimit=3;
 const complexity=[1,2,3];
@@ -50,12 +50,25 @@ class Dev {
 }
 
 class Dep {
-    constructor(type) {
-        this.type = type;
+    constructor(build) {
+        this.type = build.type;
         this.devs = [];
         this.testedProjects = [];
         this.workDoneProjects = [];
     }
+
+
+	static get Builder() { 
+		class Builder { 
+			constructor(type) { 
+				this.type = type;
+			} 
+			build() { 
+			return new Dep(this); 
+			} 
+		} 
+		return Builder; 
+	} 
 
 
     chooseFreeDev(value) {
@@ -116,15 +129,15 @@ class Dep {
 }
 
 
-const QA=new Dep("QA");
-const web=new Dep("web");
-const mobile=new Dep("mobile");
+const QA=new Dep.Builder("QA").build();
+const web=new Dep.Builder("web").build();
+const mobile=new Dep.Builder("mobile").build();
 
 
 class Firm {
 
 
-    constructor() {
+     constructor() {
 		if (!singletonInstance) {
         	this.hiredDevs = 0;
         	this.dissmissedDevs = 0;
@@ -227,8 +240,8 @@ class Firm {
 
 function live() {
     const Lodoss = new Firm();
-	const Dunice = new Firm();
-	console.log((Lodoss==Dunice)?true:false);
+	const NoName = new Firm();
+	console.log(Lodoss===NoName);
     for (let i = 0; i < days; i += 1) {
         const projects = Firm.createProjects();
         totalNumberOfProjects += projects.length;
@@ -238,5 +251,5 @@ function live() {
     Lodoss.Stat();
 }
 
-
+console.log(web,mobile,QA);
 live();
