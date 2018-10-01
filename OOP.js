@@ -5,8 +5,8 @@ let id = 0;
 const daysWithoutWorkLimit=3;
 const complexityMin=1;
 const complexityMax=3;
-const recievedProjectsMin=0;
-const recievedProjectsMax=4;
+const receivedProjectsMin=0;
+const receivedProjectsMax=4;
 
 
 function random(min, max) {
@@ -22,17 +22,8 @@ class Project {
         this.complexity = complexity;
     }
 }
-class projectWeb extends Project{
-    type(){
-        super.type="web";
-    }
-}
-
-class projectMobile extends Project{
-    type(){
-        super.type="mobile";
-    }
-}
+class projectWeb extends Project{}
+class projectMobile extends Project{}
 
 class Dev {
     constructor(project) {
@@ -143,7 +134,6 @@ class Dep {
     }
 }
 
-
 const QA1=new Dep.Builder("QA").number(1).build();
 const QA2=new Dep.Builder("QA").number(2).build();
 const web1=new Dep.Builder("web").number(1).build();
@@ -178,12 +168,11 @@ class Firm {
 
     dayAdding() {
         this.testedProjects.forEach(project => {
-            if (!QA1.projectDistribution(project)) {
-                let w=random(0,1);
-                if (w===0)
-                    QA1.newDev(new Dev(project));
-                else
+            if (!(QA1||QA2).projectDistribution(project)) {
+                if (random(0,1)===0)
                     QA2.newDev(new Dev(project));
+                else
+                    QA1.newDev(new Dev(project));
             this.hiredDevs += 1;
         }
     });
@@ -196,8 +185,7 @@ class Firm {
 
         this.previousProjects.forEach(project => {
         if(project instanceof projectWeb){
-            let y = random(0, 1);
-            if(y===0){
+            if(random(0, 1)===0){
                 web1.newDev(new Dev(project));
                 this.hiredDevs += 1;
             }
@@ -206,8 +194,7 @@ class Firm {
                 this.hiredDevs += 1;
             }
         }else if(project instanceof projectMobile){
-            let y = random(0, 1);
-            if(y===0) {
+            if(random(0, 1)===0) {
                 mobile1.newDev(new Dev(project));
                 this.hiredDevs += 1;
             }
@@ -251,13 +238,13 @@ class Firm {
 
     static createProjects() {
         const projects = [];
-        let z=random(recievedProjectsMin, recievedProjectsMax);
-        for (let i = 0; i < z; i += 1) {
-            let x=random(0,2);
-            if(x===0)
+        let z=random(receivedProjectsMin, receivedProjectsMax);
+        while(z!==0){
+            if(random(0,2)===0)
                 projects.push(new projectWeb(random(complexityMin, complexityMax)));
             else
                 projects.push(new projectMobile(random(complexityMin, complexityMax)));
+            z--;
         }
         return projects;
     }
@@ -270,7 +257,7 @@ class Firm {
         console.log(mobile2.devs.length,mobile2.type,mobile2.number);
         console.log(QA1.devs.length,QA1.type,QA1.number);
         console.log(QA2.devs.length,QA2.type,QA2.number);
-        console.log("Общее количество проектов:", totalNumberOfProjects);
+        console.log("Поступившие количество проектов:", totalNumberOfProjects);
         console.log("Количество готовых проектов: ", QA1.workDoneProjects.length);
         console.log("Нанятые: ", this.hiredDevs);
         console.log("Уволенные: ", this.dissmissedDevs);
@@ -284,7 +271,7 @@ class Firm {
 }
 
 class live {
-    constructor(Comp) {
+    constructor() {
         if (!singleton1) {
             this.Comp=new Firm;
             singleton1=this;
@@ -314,7 +301,5 @@ class live {
     }
 }
 
-let Live=new live("Lodoss");
-let Live1=new live("NoName");
-console.log(Live===Live1);
-Live.live(100);
+let Live=new live();
+Live.live(100,"detail");
