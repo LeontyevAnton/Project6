@@ -1,27 +1,35 @@
-const days = 1000;//prompt("Сколько дней вашей фирме?");
 let totalNumberOfProjects = 0;
+let singleton = null;
+let singleton1 = null;
 let id = 0;
 const daysWithoutWorkLimit=3;
-const complexity=[1,2,3];
-const recievedProjects=[0,1,2,3,4];
+const complexityMin=1;
+const complexityMax=3;
+const receivedProjectsMin=0;
+const receivedProjectsMax=4;
+
+
+function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 class Project {
     get id() {
         return this._id;
     }
-    constructor(complexity,dep) {
+    constructor(complexity) {
         this._id=id+=1;
         this.complexity = complexity;
-        this.type=dep.type;
     }
 }
+class projectWeb extends Project{}
+class projectMobile extends Project{}
 
 class Dev {
-    constructor(specialization, project) {
+    constructor(project) {
         this.doneProjects = 0;
         this.daysWithoutWork = 0;
         this.project = null;
-        this.specialization = specialization;
         this.workProject(project);
     }
 
@@ -29,31 +37,45 @@ class Dev {
     workProject(project, workInTeam) {
         this.project = project;
         this.daysWithoutWork = 0;
-        switch (this.specialization) {
-            case "web":
-                this.work = project.complexity;
-                break;
-            case "mobile":
-                this.work = workInTeam ? 1 : project.complexity;
-                break;
-            default:
-                this.work = 1;
-        }
+        if (project instanceof projectWeb)
+            this.work = project.complexity;
+        else if(project instanceof projectMobile)
+            this.work = workInTeam ? 1 : project.complexity;
+        else
+            this.work = 1;
     }
 
 
-    completedProjects() {
+    completedProjects(){
         this.doneProjects += 1;
         this.project = null;
     }
 }
 
 class Dep {
-    constructor(type) {
-        this.type = type;
+    constructor(build) {
+        this.type = build.type;
+        this.number=build.number;
         this.devs = [];
         this.testedProjects = [];
         this.workDoneProjects = [];
+    }
+
+
+    static get Builder() {
+        class Builder {
+            constructor(type) {
+                this.type = type;
+            }
+            number(number){
+                this.number=number;
+                return this;
+            }
+            build() {
+                return new Dep(this);
+            }
+        }
+        return Builder;
     }
 
 
@@ -74,16 +96,14 @@ class Dep {
             return true;
         }
 
-        const devs = this.chooseFreeDev(true);
-
         if (!this.chooseFreeDev(true).length)
             return false;
 
-        if (devs.length < project.complexity)
-            devs[0].workProject(project);
+        if (this.chooseFreeDev(true).length < project.complexity)
+            this.chooseFreeDev(true)[0].workProject(project);
         else
             for (let i = 0; i < project.complexity; i += 1)
-                devs[i].workProject(project, true);
+                this.chooseFreeDev(true)[i].workProject(project, true);
 
         return true;
     }
@@ -92,20 +112,20 @@ class Dep {
     dayAdding() {
         this.devs.forEach((dev) => {
             const {work, project} = dev;
-            if (!project)
-                dev.daysWithoutWork += 1;
+        if (!project)
+            dev.daysWithoutWork += 1;
 
-            if (work)
-                dev.work -= 1;
+        if (work)
+            dev.work -= 1;
 
-            if (!dev.work && project) {
-                if (this.type === "QA")
-                    this.workDoneProjects.push(project);
-                else if (!this.testedProjects.find(proj => proj.id === project.id))
-                    this.testedProjects.push(project);
-                dev.completedProjects();
-            }
-        });
+        if (!dev.work && project) {
+            if (this.type === "QA")
+                this.workDoneProjects.push(project);
+            else if (!this.testedProjects.find(proj => proj.id === project.id))
+            this.testedProjects.push(project);
+            dev.completedProjects();
+        }
+    });
     }
 
 
@@ -114,122 +134,172 @@ class Dep {
     }
 }
 
-
-const QA=new Dep("QA");
-const web=new Dep("web");
-const mobile=new Dep("mobile");
+const QA1=new Dep.Builder("QA").number(1).build();
+const QA2=new Dep.Builder("QA").number(2).build();
+const web1=new Dep.Builder("web").number(1).build();
+const web2=new Dep.Builder("web").number(2).build();
+const mobile1=new Dep.Builder("mobile").number(1).build();
+const mobile2=new Dep.Builder("mobile").number(2).build();
 
 
 class Firm {
 
 
     constructor() {
-        this.hiredDevs = 0;
-        this.dissmissedDevs = 0;
-        this.departments={web,mobile,QA};
-        this.previousProjects = [];
-        this.testedProjects = [];
+        if (!singleton) {
+            this.hiredDevs = 0;
+            this.dissmissedDevs = 0;
+            this.departments={web1,web2,mobile1,mobile2,QA1,QA2};
+            this.previousProjects = [];
+            this.testedProjects = [];
+            singleton = this;
+        }
+        return singleton;
     }
 
 
     takeProjects(projects) {
         projects.forEach(project => {
-            if (!(web||mobile).projectDistribution(project))
+            if (!(web1||web2||mobile1||mobile2).projectDistribution(project))
                 this.previousProjects.push(project);
-        });
+    });
     }
 
 
     dayAdding() {
         this.testedProjects.forEach(project => {
-            if (!QA.projectDistribution(project)) {
-                QA.newDev(new Dev("QA", project));
-                this.hiredDevs += 1;
-            }
-        });
+            if (!(QA1||QA2).projectDistribution(project)) {
+                if (random(0,1)===0)
+                    QA2.newDev(new Dev(project));
+                else
+                    QA1.newDev(new Dev(project));
+            this.hiredDevs += 1;
+        }
+    });
 
         this.testedProjects.length=0;
 
         Object.keys(this.departments).forEach(key => {
             this.departments[key].dayAdding();
-        });
+    });
 
         this.previousProjects.forEach(project => {
-            (web||mobile).newDev(new Dev((web||mobile), project));
-            this.hiredDevs += 1;
-        });
+        if(project instanceof projectWeb){
+            if(random(0, 1)===0){
+                web1.newDev(new Dev(project));
+                this.hiredDevs += 1;
+            }
+            else{
+                web2.newDev(new Dev(project));
+                this.hiredDevs += 1;
+            }
+        }else if(project instanceof projectMobile){
+            if(random(0, 1)===0) {
+                mobile1.newDev(new Dev(project));
+                this.hiredDevs += 1;
+            }
+            else {
+                mobile2.newDev(new Dev(project));
+                this.hiredDevs += 1;
+            }
+        }
+    });
 
         this.previousProjects.length=0;
 
         Object.keys(this.departments).forEach(key => {
             if (this.departments[key].type !== "QA") {
-                this.departments[key].testedProjects.forEach(proj => this.testedProjects.push(proj));
-                this.departments[key].testedProjects.length=0;
-            }
-        });
+            this.departments[key].testedProjects.forEach(proj => this.testedProjects.push(proj));
+            this.departments[key].testedProjects.length=0;
+        }
+    });
         this.dismissal();
     }
 
 
     dismissal() {
-        let goAway;
-        let department;
+        let goAway,department, indexInList;
 
         Object.keys(this.departments).forEach(key => {
-            this.departments[key].devs.forEach(dev => {
-                if (dev.daysWithoutWork > daysWithoutWorkLimit && (!goAway || goAway.doneProjects > dev.doneProjects)) {
-                    goAway = dev;
-                    department = dev.specialization;
-                }
-            });
-        });
+            this.departments[key].devs.forEach((dev,index) => {
+            if (dev.daysWithoutWork > daysWithoutWorkLimit && (!goAway || goAway.doneProjects > dev.doneProjects)) {
+            goAway = dev;
+            department = key;
+            indexInList=index;
+        }
+    });
+    });
 
-        if (goAway && department) {
-            QA.devs.splice(0);
-            web.devs.splice(0);
-            mobile.devs.splice(0);
+        if (goAway && department && indexInList) {
+            this.departments[department].devs.splice(indexInList,1);
             this.dissmissedDevs += 1;
         }
     }
 
-
-    static random(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-
     static createProjects() {
         const projects = [];
-        for (let i = 0; i < Firm.random(recievedProjects[0], recievedProjects[4]); i += 1) {
-            let x=Firm.random(0,1);
-            if(x===0)
-                projects.push(new Project(Firm.random(complexity[0], complexity[2]),web));
+        let z=random(receivedProjectsMin, receivedProjectsMax);
+        while(z!==0){
+            if(random(0,2)===0)
+                projects.push(new projectWeb(random(complexityMin, complexityMax)));
             else
-                projects.push(new Project(Firm.random(complexity[0], complexity[2]),mobile));
+                projects.push(new projectMobile(random(complexityMin, complexityMax)));
+            z--;
         }
         return projects;
     }
 
 
-    Stat(){
-        console.log("Общее количество проектов", totalNumberOfProjects);
-        console.log("Количество готовых проектов: ", QA.workDoneProjects);
+    statDetail(){
+        console.log(web1.devs.length,web1.type,web1.number);
+        console.log(web2.devs.length,web2.type,web2.number);
+        console.log(mobile1.devs.length,mobile1.type,mobile1.number);
+        console.log(mobile2.devs.length,mobile2.type,mobile2.number);
+        console.log(QA1.devs.length,QA1.type,QA1.number);
+        console.log(QA2.devs.length,QA2.type,QA2.number);
+        console.log("Поступившие количество проектов:", totalNumberOfProjects);
+        console.log("Количество готовых проектов: ", QA1.workDoneProjects.length);
+        console.log("Нанятые: ", this.hiredDevs);
+        console.log("Уволенные: ", this.dissmissedDevs);
+    }
+    stat(){
+        console.log("Общее количество проектов:", totalNumberOfProjects);
+        console.log("Количество готовых проектов: ", QA1.workDoneProjects.length);
         console.log("Нанятые: ", this.hiredDevs);
         console.log("Уволенные: ", this.dissmissedDevs);
     }
 }
 
-
-function live() {
-    const Lodoss = new Firm();
-    for (let i = 0; i < days; i += 1) {
-        const projects = Firm.createProjects();
-        totalNumberOfProjects += projects.length;
-        Lodoss.takeProjects(projects);
-        Lodoss.dayAdding();
+class live {
+    constructor() {
+        if (!singleton1) {
+            this.Comp=new Firm;
+            singleton1=this;
+        }
+        return singleton1;
     }
-    Lodoss.Stat();
+
+    live(days,param) {
+        if(param==="detail"){
+            for(let i=0;i<days;i++) {
+                console.log("День:",i);
+                const projects = Firm.createProjects();
+                totalNumberOfProjects += projects.length;
+                this.Comp.takeProjects(projects);
+                this.Comp.statDetail();
+                this.Comp.dayAdding();
+            }
+        }else{
+            for(let i=0;i<days;i++) {
+                const projects = Firm.createProjects();
+                totalNumberOfProjects += projects.length;
+                this.Comp.takeProjects(projects);
+                this.Comp.dayAdding();
+            }
+            this.Comp.stat();
+        }
+    }
 }
 
-
-live();
+let Live=new live();
+Live.live(100,"detail");
